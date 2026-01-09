@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cyber Crime Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #020202, #000);
+      color: #00ff99;
+      font-family: "Courier New", monospace;
+      padding: 20px;
+      overflow: hidden;
+    }
+    .red { color: #ff3333; font-weight: bold; }
+    .blink { animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .lock {
+      position: fixed;
+      inset: 0;
+      background: black;
+      z-index: 9999;
+      display:none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="lock" id="lock"></div>
+
+<h2 class="red">⚠ CYBER CRIME DEPARTMENT – INDIA ⚠</h2>
+<p id="output"></p>
+<h3 id="timer" class="red"></h3>
+<p class="blink">█ ACCESS TERMINAL █</p>
+
+<!-- 🎧 Police Radio Background -->
+<audio id="radio" loop>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b0c6c9f3a.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const params = new URLSearchParams(location.search);
+const name = params.get("name") || "AASTHA";
+const city = params.get("city") || "Kota";
+const out = document.getElementById("output");
+const radio = document.getElementById("radio");
+
+radio.volume = 0.15;
+
+const lines = [
+  `Connecting to Cyber Crime Server...`,
+  `Location traced: ${city}`,
+  `Suspect identified: ${name}`,
+  `${name}, ye message Cyber Crime Unit se hai.`,
+  `Aapke device se suspicious activity detect hui hai.`,
+  `IPC Section 43 aur IT Act ke tahat FIR initiate ho rahi hai.`,
+  `Mobile aur social accounts monitor par hain.`
+];
+
+let index = 0;
+
+/* 🎧 Start radio on first user interaction */
+document.body.addEventListener("click", () => {
+  radio.play();
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen();
+  }
+}, { once:true });
+
+/* 🔊 + ⌨️ Dynamic Voice + Slow Typing */
+function playLine() {
+  if (index >= lines.length) {
+    startCountdown();
+    return;
+  }
+
+  const text = lines[index];
+  const lineEl = document.createElement("div");
+  out.appendChild(lineEl);
+
+  // 🔊 Voice
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "hi-IN";
+  msg.rate = 0.85;
+  msg.pitch = 0.65;
+  speechSynthesis.speak(msg);
+
+  // ⏱ Dynamic typing speed (voice length based)
+  const estimatedVoiceTime = text.length * 90; // ms
+  const typingSpeed = Math.max(80, estimatedVoiceTime / text.length);
+
+  let char = 0;
+  const typer = setInterval(() => {
+    lineEl.textContent += text.charAt(char);
+    char++;
+
+    if (char >= text.length) {
+      clearInterval(typer);
+      vibrate();
+      index++;
+      setTimeout(playLine, 800);
+    }
+  }, typingSpeed);
+}
+
+// 📳 Vibration
+function vibrate() {
+  if (navigator.vibrate) navigator.vibrate([300,200,300]);
+}
+
+// ⏳ Countdown with slow typing
+function startCountdown() {
+  let t = 6;
+  const timer = document.getElementById("timer");
+
+  const interval = setInterval(() => {
+    const text = `FIR lock hone me ${t} seconds...`;
+    timer.textContent = "";
+
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "hi-IN";
+    msg.rate = 0.9;
+    speechSynthesis.speak(msg);
+
+    let i = 0;
+    const typer = setInterval(() => {
+      timer.textContent += text.charAt(i);
+      i++;
+      if (i >= text.length) clearInterval(typer);
+    }, 90);
+
+    vibrate();
+    t--;
+
+    if (t < 0) {
+      clearInterval(interval);
+      lockSystem();
+    }
+  }, 2000);
+}
+
+// 🔒 Final Lock
+function lockSystem() {
+  document.getElementById("lock").style.display = "block";
+  const msg = new SpeechSynthesisUtterance("System locked");
+  msg.lang = "en-IN";
+  speechSynthesis.speak(msg);
+}
+
+// start
+playLine();
+</script>
+
+</body>
+</html>
